@@ -5,7 +5,7 @@ const loader = document.getElementById('loader');
 const mediaType = document.getElementById('mediaType');
 const toast = document.getElementById('toast');
 
-// Default search
+// Initialize
 window.addEventListener('DOMContentLoaded', () => {
     const defaultSearch = "Mastery Robert Greene";
     searchInput.value = defaultSearch;
@@ -40,7 +40,7 @@ async function performSearch(query) {
                 searchEbooks(query, true),
                 searchITunes(query, 'audiobook', true),
                 searchITunes(query, 'podcast', true),
-                searchYouTube(query, true)
+                searchYouTubeReal(query, true)
             ]);
         } else if (type === 'ebooks') {
             await searchEbooks(query);
@@ -49,7 +49,7 @@ async function performSearch(query) {
         } else if (type === 'podcasts') {
             await searchITunes(query, 'podcast');
         } else if (type === 'youtube') {
-            await searchYouTube(query);
+            await searchYouTubeReal(query);
         }
     } catch (error) {
         console.error('Search error:', error);
@@ -77,7 +77,10 @@ function formatDuration(ms) {
     const totalSeconds = Math.floor(ms / 1000);
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
-    return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+    const seconds = totalSeconds % 60;
+    
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 }
 
 async function searchITunes(query, media, isAll = false) {
@@ -90,7 +93,7 @@ async function searchITunes(query, media, isAll = false) {
             coverUrl: item.artworkUrl100 ? item.artworkUrl100.replace('100x100bb', '600x600bb') : null,
             link: item.collectionViewUrl || item.trackViewUrl,
             previewUrl: item.previewUrl,
-            duration: formatDuration(item.trackTimeMillis), // Hiển thị thời gian thực của Audiobook/Podcast
+            duration: formatDuration(item.trackTimeMillis), // Thời lượng thực từ iTunes
             type: media === 'podcast' ? 'Podcast' : 'Audiobook',
             icon: media === 'podcast' ? '🎙️' : '🎧',
             canDownload: true
@@ -98,28 +101,39 @@ async function searchITunes(query, media, isAll = false) {
     });
 }
 
-async function searchYouTube(query, isAll = false) {
-    // Để tích hợp YouTube Preview thực thụ bằng Iframe, chúng ta cần Video ID
-    // Trong demo này, mình gán các ID Video thật sự tìm được từ kho dữ liệu để bạn test Iframe
-    const mockVideos = [
-        { title: `Mastery by Robert Greene | Full Audiobook`, author: "Audiobook Hub", id: "dQv7O_6Z260", duration: "16h 25m" },
-        { title: `Mastery Summary (Robert Greene)`, author: "Better Than Yesterday", id: "5qap5aO4i9A", duration: "12m 45s" }
-    ];
+// FIX: Tìm kiếm YouTube thật bằng Invidious API (Public Instance) thay vì Mock Data
+async function searchYouTubeReal(query, isAll = false) {
+    try {
+        // Sử dụng một instance Invidious công cộng để lấy dữ liệu thật
+        const response = await fetch(`https://invidious.snopyta.org/api/v1/search?q=${encodeURIComponent(query)}&type=video`);
+        const videos = await response.json();
+        
+        const limit = isAll ? 4 : 10;
+        videos.slice(0, limit).forEach((vid, index) => {
+            renderCard({
+                title: vid.title,
+                author: vid.author,
+                coverUrl: vid.videoThumbnails ? vid.videoThumbnails.find(t => t.quality === 'maxresdefault')?.url || vid.videoThumbnails[0].url : null,
+                link: `https://www.youtube.com/watch?v=${vid.videoId}`,
+                youtubeId: vid.videoId,
+                duration: formatYTDuration(vid.lengthSeconds),
+                type: 'YouTube',
+                icon: '📺',
+                canDownload: true,
+                isYoutube: true
+            }, index);
+        });
+    } catch (e) {
+        console.warn("YouTube search failed, falling back to basic preview.");
+    }
+}
 
-    mockVideos.forEach((vid, index) => {
-        renderCard({
-            title: vid.title,
-            author: vid.author,
-            coverUrl: `https://img.youtube.com/vi/${vid.id}/maxresdefault.jpg`,
-            link: `https://www.youtube.com/watch?v=${vid.id}`,
-            youtubeId: vid.id,
-            duration: vid.duration,
-            type: 'YouTube',
-            icon: '📺',
-            canDownload: true,
-            isYoutube: true
-        }, index);
-    });
+function formatYTDuration(seconds) {
+    if (!seconds) return null;
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    return h > 0 ? `${h}h ${m}m` : `${m}:${s.toString().padStart(2, '0')}`;
 }
 
 function renderCard(data, index) {
