@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OmniBook | Discover & Read Ebooks</title>
+    <link rel="stylesheet" href="index.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1>Omni<span>Book</span></h1>
+            <p>Search, discover, and access free digital ebooks, audiobooks, and podcasts globally.</p>
+            <div class="search-bar">
+                <select id="mediaType" class="media-select" title="Select Media Type">
+                    <option value="all">🌍 All Media</option>
+                    <option value="ebooks">📚 Ebooks</option>
+                    <option value="audiobooks">🎧 Audiobooks</option>
+                    <option value="podcasts">🎙️ Podcasts</option>
+                    <option value="youtube">📺 YouTube</option>
+                </select>
+                <div class="search-divider"></div>
+                <input type="text" id="searchInput" placeholder="Search for books, podcasts, or videos..." />
+                <button id="searchBtn" title="Search">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </button>
+            </div>
+        </header>
+
+        <main>
+            <div id="loader" class="hidden">
+                <div class="spinner"></div>
+                <p>Searching global archives...</p>
+            </div>
+            
+            <div id="resultsGrid" class="results-grid">
+                <!-- Data will be dynamically injected here -->
+            </div>
+        </main>
+        <div id="toast" class="toast hidden"></div>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>
