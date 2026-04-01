@@ -24,7 +24,7 @@
 
 ### 🛠️ Cơ chế "System Bridge" (Download Flow):
 - **Giao diện:** Khi người dùng nhấn nút Download, JS sẽ ghi một log đặc biệt `[SYSTEM_DOWNLOAD_REQUEST]`.
-- **Thực thi:** AI (Antigravity) sẽ "lắng nghe" các yêu cầu này và sử dụng skill `tai-video` cùng công cụ `yt-dlp` trong Terminal để tải file về thư mục `workspace/download book/`.
+- **Thực thi:** AI (Antigravity) sẽ "lắng nghe" các yêu cầu này và sử dụng skill `tai-video` cùng công cụ `yt-dlp` trong Terminal để tải file về thư mục `workspace/download_book/`.
 
 ---
 
